@@ -18,12 +18,13 @@ const userData: Prisma.UserCreateInput[] = [
     dni: '11111111',
     fullName: 'jose luis galindo cardenas',
     password: '123456',
+    role: 'ADMIN',
   },
-
   {
     dni: '22222222',
     fullName: 'lagarto estudioso',
     password: '123456',
+    role: 'STUDENT',
   },
 ];
 
