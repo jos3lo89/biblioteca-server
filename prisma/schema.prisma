@@ -13,3 +13,80 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum ROle {
+  ADMIN
+  STUDENT
+}
+
+model User {
+  id          String       @id @default(uuid())
+  dni         String       @unique
+  fullName    String
+  password    String
+  role        ROle         @default(STUDENT)
+  isActive    Boolean      @default(true)
+  enrollments Enrollment[]
+  reviews     Review[]
+  createdAt   DateTime     @default(now())
+}
+
+model Period {
+  id          String       @id @default(uuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  isCurrent   Boolean      @default(false)
+  enrollments Enrollment[]
+}
+
+model Enrollment {
+  id        String  @id @default(uuid())
+  userId    String
+  periodId  String
+  canAccess Boolean @default(true) // Si debe dinero, false
+
+  user   User   @relation(fields: [userId], references: [id])
+  period Period @relation(fields: [periodId], references: [id])
+
+  @@unique([userId, periodId]) // Un alumno solo una matricula por periodo
+}
+
+model Category {
+  id    String @id @default(uuid())
+  name  String
+  slug  String @unique
+  books Book[]
+}
+
+model Book {
+  id             String  @id @default(uuid())
+  title          String
+  author         String
+  description    String? @db.Text
+  coverUrl       String? // Portada pública
+  fileKey        String // LLAVE PRIVADA en MinIO (no la URL)
+  isDownloadable Boolean @default(false)
+  categoryId     String
+
+  category Category @relation(fields: [categoryId], references: [id])
+  reviews  Review[]
+}
+
+model Review {
+  id       String  @id @default(ulid())
+  content  String
+  rating   Int? // 1-5
+  userId   String
+  bookId   String
+  parentId String? // Para respuestas anidadas
+
+  user User @relation(fields: [userId], references: [id])
+  book Book @relation(fields: [bookId], references: [id])
+
+  // Relación reflexiva para comentarios anidados
+  parent   Review?  @relation("ReviewReplies", fields: [parentId], references: [id])
+  children Review[] @relation("ReviewReplies")
+
+  createdAt DateTime @default(now())
+}
