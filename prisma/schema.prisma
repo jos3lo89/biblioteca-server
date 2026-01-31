@@ -14,23 +14,26 @@ datasource db {
   provider = "postgresql"
 }
 
-enum ROle {
+enum UserRole {
   ADMIN
   STUDENT
 }
 
+// modelo del usuario admin o alumnos
 model User {
   id          String       @id @default(uuid())
   dni         String       @unique
   fullName    String
   password    String
-  role        ROle         @default(STUDENT)
+  role        UserRole     @default(STUDENT)
   isActive    Boolean      @default(true)
   enrollments Enrollment[]
   reviews     Review[]
   createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
+// Definición del ciclo académico y cuál está vigente. - 2026-1
 model Period {
   id          String       @id @default(uuid())
   name        String
@@ -38,39 +41,48 @@ model Period {
   endDate     DateTime
   isCurrent   Boolean      @default(false)
   enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
+// Es la tabla puente entre User y Period.
 model Enrollment {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
   periodId  String
-  canAccess Boolean @default(true) // Si debe dinero, false
-
-  user   User   @relation(fields: [userId], references: [id])
-  period Period @relation(fields: [periodId], references: [id])
+  canAccess Boolean  @default(true) // Si debe dinero, false
+  user      User     @relation(fields: [userId], references: [id])
+  period    Period   @relation(fields: [periodId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, periodId]) // Un alumno solo una matricula por periodo
 }
 
+// Clasificación del catálogo (Matemáticas, Historia, etc).
 model Category {
-  id    String @id @default(uuid())
-  name  String
-  slug  String @unique
-  books Book[]
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  books     Book[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+// Representa un libro del catálogo y el archivo PDF asociado en MinIO.
 model Book {
-  id             String  @id @default(uuid())
+  id             String   @id @default(uuid())
   title          String
   author         String
-  description    String? @db.Text
+  description    String?  @db.Text
   coverUrl       String? // Portada pública
   fileKey        String // LLAVE PRIVADA en MinIO (no la URL)
-  isDownloadable Boolean @default(false)
+  isDownloadable Boolean  @default(false)
   categoryId     String
-
-  category Category @relation(fields: [categoryId], references: [id])
-  reviews  Review[]
+  category       Category @relation(fields: [categoryId], references: [id])
+  reviews        Review[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Review {
