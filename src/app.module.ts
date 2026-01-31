@@ -8,6 +8,8 @@ import { UsersModule } from './modules/users/users.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { PeriodsModule } from './modules/periods/periods.module';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
+import { BooksModule } from './modules/books/books.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
     CategoriesModule,
     PeriodsModule,
     EnrollmentsModule,
+    BooksModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
