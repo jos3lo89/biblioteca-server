@@ -1,44 +1,50 @@
-import { PrismaClient } from '@/generated/prisma/client';
+import { Prisma, PrismaClient } from '../src/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { config } from 'dotenv';
 import bcryptjs from 'bcryptjs';
 
 config();
 
-const adapter = new PrismaPg({
+const pool = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
 });
 
 const prisma = new PrismaClient({
-  adapter,
+  adapter: pool,
 });
 
+const userData: Prisma.UserCreateInput[] = [
+  {
+    dni: '11111111',
+    fullName: 'jose luis galindo cardenas',
+    password: '123456',
+  },
+
+  {
+    dni: '22222222',
+    fullName: 'lagarto estudioso',
+    password: '123456',
+  },
+];
+
 async function main() {
-  console.log('creando usuarios');
+  console.log(`Start seeding ...`);
 
   const salt = await bcryptjs.genSalt(10);
-  const adminUser = await prisma.user.upsert({
-    where: { dni: '11111111' },
-    update: {},
-    create: {
-      dni: '11111111',
-      fullName: 'Jose Luis Galindo Cardenas',
-      password: await bcryptjs.hash('11111111', salt),
-    },
-  });
 
-  console.log('usuario administarador es muy pro: ', adminUser);
-  console.log('Creando usuario alumno');
+  for (const u of userData) {
+    const user = await prisma.user.upsert({
+      where: { dni: u.dni },
+      update: {},
+      create: {
+        ...u,
+        password: await bcryptjs.hash(u.password, salt),
+      },
+    });
 
-  const newUser = await prisma.user.upsert({
-    where: { dni: '2222222' },
-    update: {},
-    create: {
-      dni: '2222222',
-      fullName: 'lagarto estudioso',
-      password: await bcryptjs.hash('2222222', salt),
-    },
-  });
+    console.log(`Created user with id: ${user.id}`);
+  }
+  console.log(`Seeding finished.`);
 }
 
 main()
