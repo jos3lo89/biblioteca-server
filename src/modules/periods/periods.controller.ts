@@ -37,6 +37,6 @@ export class PeriodsController {
     )
     id: string,
   ) {
-    console.log(id);
+    return this.periodService.setCurrentPeriod(id);
   }
 }
