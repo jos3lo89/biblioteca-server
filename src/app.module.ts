@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { PeriodsModule } from './modules/periods/periods.module';
+import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PeriodsModule } from './modules/periods/periods.module';
     UsersModule,
     CategoriesModule,
     PeriodsModule,
+    EnrollmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

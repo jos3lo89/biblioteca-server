@@ -50,7 +50,7 @@ model Enrollment {
   id        String   @id @default(uuid())
   userId    String
   periodId  String
-  canAccess Boolean  @default(true) // Si debe dinero, false
+  canAccess Boolean  @default(false) // Si debe dinero, false
   user      User     @relation(fields: [userId], references: [id])
   period    Period   @relation(fields: [periodId], references: [id])
   createdAt DateTime @default(now())
