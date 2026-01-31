@@ -1,5 +1,6 @@
 import { PrismaService } from '@/core/prisma/prisma.service';
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -7,6 +8,7 @@ import {
 import { LoginDto } from './dto/login.dto';
 import bcryptjs from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -36,5 +38,29 @@ export class AuthService {
     const { password, ...result } = user;
 
     return { token, result };
+  }
+  async register(values: RegisterDto) {
+    const userFound = await this.prisma.user.findUnique({
+      where: { dni: values.dni },
+    });
+
+    if (userFound) {
+      throw new ConflictException('DNI ya esta registrado');
+    }
+
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPwd = await bcryptjs.hash(values.password, salt);
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        ...values,
+        password: hashedPwd,
+      },
+      omit: {
+        password: true,
+      },
+    });
+
+    return newUser;
   }
 }

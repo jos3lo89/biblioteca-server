@@ -11,6 +11,8 @@ import { LoginDto } from './dto/login.dto';
 import { type Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { Auth } from '@/common/decorators/auth.decorator';
+import { RegisterDto } from './dto/register.dto';
+import { UserRole } from '@/generated/prisma/enums';
 
 @Controller('auth')
 export class AuthController {
@@ -55,5 +57,11 @@ export class AuthController {
     });
 
     return { message: 'Sesión cerrada' };
+  }
+
+  @Post('register')
+  @Auth(UserRole.ADMIN)
+  register(@Body() body: RegisterDto) {
+    return this.authService.register(body);
   }
 }
