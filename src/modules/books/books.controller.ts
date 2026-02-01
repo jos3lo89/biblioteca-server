@@ -17,8 +17,6 @@ import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { Auth } from '@/common/decorators/auth.decorator';
 import { UserRole } from '@/generated/prisma/enums';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { type CurrentUserI } from '@/common/interfaces/current-user.interface';
 
 @Controller('books')
 export class BooksController {
@@ -51,11 +49,13 @@ export class BooksController {
   }
 
   @Get()
+  @Auth()
   async findAll() {
     return this.booksService.findAll();
   }
 
   @Get(':id')
+  @Auth()
   async findOne(
     @Param(
       'id',
@@ -89,6 +89,7 @@ export class BooksController {
   }
 
   @Get(':id/read')
+  @Auth()
   readBook(
     @Param(
       'id',
