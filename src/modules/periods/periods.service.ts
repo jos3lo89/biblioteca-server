@@ -27,6 +27,46 @@ export class PeriodsService {
     return newPeriod;
   }
 
+  async getAllPeriods(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+
+    const [total, periods] = await this.prisma.$transaction([
+      this.prisma.period.count(),
+
+      this.prisma.period.findMany({
+        skip: skip,
+        take: limit,
+        include: {
+          _count: {
+            select: {
+              enrollments: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+    const next = page < lastPage ? page + 1 : null;
+    const prev = page > 1 ? page - 1 : null;
+
+    return {
+      data: periods,
+      meta: {
+        total,
+        page,
+        lastPage,
+        hasNext: page < lastPage,
+        hasPrev: page > 1,
+        nextPage: next,
+        prevPage: prev,
+      },
+    };
+  }
+
   async setCurrentPeriod(periodId: string) {
     const periodFound = await this.prisma.period.findUnique({
       where: { id: periodId },
