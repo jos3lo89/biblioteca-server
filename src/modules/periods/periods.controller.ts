@@ -53,11 +53,6 @@ export class PeriodsController {
     )
     limit: number,
   ) {
-    console.log({
-      page,
-      limit,
-    });
-
     return this.periodService.getAllPeriods(page, limit);
   }
 
