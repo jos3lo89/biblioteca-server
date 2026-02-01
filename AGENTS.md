@@ -4,6 +4,33 @@
 
 This is a NestJS-based backend for a library management system using TypeScript, Prisma ORM with PostgreSQL, and JWT authentication.
 
+## Important Notes for Agents
+
+### Tests
+
+- **DO NOT execute tests** - Tests are managed by the user
+- **DO NOT modify existing test files** - Only create new test files if explicitly requested
+- **DO NOT run `npm run test`** or any test-related commands
+- Focus on implementation code only
+
+### Commits
+
+When creating commits (only when explicitly requested by the user):
+
+1. Follow the commit message convention:
+   - `feat`: New feature
+   - `fix`: Bug fix
+   - `docs`: Documentation changes
+   - `refactor`: Code refactoring
+   - `test`: Adding/modifying tests
+   - `chore`: Maintenance tasks
+
+2. Format: `<type>: <description>`
+   - Example: `feat(auth): add login endpoint`
+   - Example: `fix(books): resolve cover upload issue`
+
+3. Keep commits atomic (one purpose per commit)
+
 ## Build, Lint, and Test Commands
 
 ### Build Commands
