@@ -8,6 +8,8 @@ import {
 import { StudentRegisterDto } from './dto/student-register.dto';
 
 import bcryptjs from 'bcryptjs';
+import { FindUsersQueryDto } from './dto/find-users-query.dto';
+import { Prisma } from '@/generated/prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -27,16 +29,25 @@ export class UsersService {
     return result;
   }
 
-  async getAllStudents(page: number, limit: number) {
+  async getAllStudents(query: FindUsersQueryDto) {
+    const { page = 1, limit = 5, search } = query;
     const skip = (page - 1) * limit;
 
-    const [total, students] = await this.prisma.$transaction([
-      this.prisma.user.count({
-        where: { role: 'STUDENT' },
+    const where: Prisma.UserWhereInput = {
+      role: 'STUDENT',
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { fullName: { contains: search, mode: 'insensitive' } },
+          { dni: { contains: search, mode: 'insensitive' } },
+        ],
       }),
+    };
 
+    const [total, students] = await this.prisma.$transaction([
+      this.prisma.user.count({ where }),
       this.prisma.user.findMany({
-        where: { role: 'STUDENT' },
+        where,
         omit: { password: true },
         skip: skip,
         take: limit,

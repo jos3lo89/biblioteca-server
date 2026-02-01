@@ -15,6 +15,7 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { type CurrentUserI } from '@/common/interfaces/current-user.interface';
 import { UserRole } from '@/generated/prisma/enums';
 import { StudentRegisterDto } from './dto/student-register.dto';
+import { FindUsersQueryDto } from './dto/find-users-query.dto';
 
 @Controller('users')
 export class UsersController {
@@ -28,31 +29,8 @@ export class UsersController {
 
   @Get('students')
   @Auth(UserRole.ADMIN)
-  getAllStudents(
-    @Query(
-      'page',
-      new DefaultValuePipe(1),
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-        exceptionFactory() {
-          return new BadRequestException('Formato de pagina incorrecta');
-        },
-      }),
-    )
-    page: number,
-    @Query(
-      'limit',
-      new DefaultValuePipe(5),
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-        exceptionFactory() {
-          return new BadRequestException('Formato de limite incorrecta');
-        },
-      }),
-    )
-    limit: number,
-  ) {
-    return this.userService.getAllStudents(page, limit);
+  getAllStudents(@Query() query: FindUsersQueryDto) {
+    return this.userService.getAllStudents(query);
   }
 
   @Post('students/register')

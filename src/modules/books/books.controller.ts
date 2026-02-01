@@ -10,6 +10,9 @@ import {
   ParseUUIDPipe,
   BadRequestException,
   HttpStatus,
+  ParseIntPipe,
+  DefaultValuePipe,
+  Query,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -17,6 +20,7 @@ import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { Auth } from '@/common/decorators/auth.decorator';
 import { UserRole } from '@/generated/prisma/enums';
+import { FindBooksQueryDto } from './dto/find-books-query.dto';
 
 @Controller('books')
 export class BooksController {
@@ -50,8 +54,10 @@ export class BooksController {
 
   @Get()
   @Auth()
-  async findAll() {
-    return this.booksService.findAll();
+  async findAll(@Query() query: FindBooksQueryDto) {
+    console.log(query);
+
+    return this.booksService.findAll(query);
   }
 
   @Get(':id')
