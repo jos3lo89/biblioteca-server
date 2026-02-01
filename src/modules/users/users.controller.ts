@@ -1,8 +1,21 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  HttpStatus,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Auth } from '@/common/decorators/auth.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { type CurrentUserI } from '@/common/interfaces/current-user.interface';
+import { UserRole } from '@/generated/prisma/enums';
+import { StudentRegisterDto } from './dto/student-register.dto';
+import { FindUsersQueryDto } from './dto/find-users-query.dto';
 
 @Controller('users')
 export class UsersController {
@@ -12,5 +25,17 @@ export class UsersController {
   @Auth()
   myProfile(@CurrentUser() user: CurrentUserI) {
     return this.userService.myProfile(user.id);
+  }
+
+  @Get('students')
+  @Auth(UserRole.ADMIN)
+  getAllStudents(@Query() query: FindUsersQueryDto) {
+    return this.userService.getAllStudents(query);
+  }
+
+  @Post('students/register')
+  @Auth(UserRole.ADMIN)
+  registerStudent(@Body() body: StudentRegisterDto) {
+    return this.userService.registerStudent(body);
   }
 }

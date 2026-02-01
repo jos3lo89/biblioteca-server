@@ -12,6 +12,7 @@ import { BooksModule } from './modules/books/books.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { RatingsModule } from './modules/ratings/ratings.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { RatingsModule } from './modules/ratings/ratings.module';
     StorageModule,
     ReviewsModule,
     RatingsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

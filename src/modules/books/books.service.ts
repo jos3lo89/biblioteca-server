@@ -2,6 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/core/prisma/prisma.service';
 import { StorageService } from '@/modules/storage/storage.service';
 import { CreateBookDto } from './dto/create-book.dto';
+import { FindBooksQueryDto } from './dto/find-books-query.dto';
+import { Prisma } from '@/generated/prisma/client';
 
 @Injectable()
 export class BooksService {
@@ -89,13 +91,59 @@ export class BooksService {
     }
   }
 
-  async findAll() {
-    const books = await this.prisma.book.findMany({
-      include: { category: true },
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(query: FindBooksQueryDto) {
+    const { page = 1, limit = 5, search, category } = query;
+    const skip = (page - 1) * limit;
 
-    return Promise.all(
+    const where: Prisma.BookWhereInput = {};
+    // A. Si hay búsqueda por texto (Título o Autor)
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { author: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // B. Si hay filtro por categoría (Slug)
+    if (category) {
+      where.category = {
+        slug: category, // Prisma filtrará por la relación category -> slug
+      };
+    }
+
+    // const where: Prisma.BookWhereInput = search
+    //   ? {
+    //       OR: [
+    //         { title: { contains: search, mode: 'insensitive' } },
+    //         { author: { contains: search, mode: 'insensitive' } },
+    //       ],
+    //     }
+    //   : {};
+
+    const [total, books] = await this.prisma.$transaction([
+      this.prisma.book.count({ where }),
+      this.prisma.book.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          category: true,
+          _count: {
+            select: {
+              reviews: true,
+              ratings: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+    const next = page < lastPage ? page + 1 : null;
+    const prev = page > 1 ? page - 1 : null;
+
+    const data = await Promise.all(
       books.map(async (book) => ({
         ...book,
         coverUrl: book.coverKey
@@ -103,6 +151,19 @@ export class BooksService {
           : null,
       })),
     );
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        lastPage,
+        hasNext: page < lastPage,
+        hasPrev: page > 1,
+        nextPage: next,
+        prevPage: prev,
+      },
+    };
   }
 
   async findOne(id: string) {
