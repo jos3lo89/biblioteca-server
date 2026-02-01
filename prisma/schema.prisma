@@ -31,6 +31,7 @@ model User {
   isActive    Boolean      @default(true)
   enrollments Enrollment[]
   reviews     Review[]
+  ratings     BookRating[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -73,34 +74,46 @@ model Category {
 
 // Representa un libro del catálogo y el archivo PDF asociado en MinIO.
 model Book {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   title          String
   author         String
-  description    String?  @db.Text
+  description    String?      @db.Text
   coverKey       String?
   fileKey        String
-  isDownloadable Boolean  @default(false)
+  isDownloadable Boolean      @default(false)
   categoryId     String
-  category       Category @relation(fields: [categoryId], references: [id])
+  category       Category     @relation(fields: [categoryId], references: [id])
   reviews        Review[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  ratings        BookRating[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Review {
   id       String  @id @default(uuid())
   content  String
-  rating   Int? // 1-5
   userId   String
   bookId   String
-  parentId String? // Para respuestas anidadas
+  parentId String?
 
   user User @relation(fields: [userId], references: [id])
   book Book @relation(fields: [bookId], references: [id])
 
-  // Relación reflexiva para comentarios anidados
   parent   Review?  @relation("ReviewReplies", fields: [parentId], references: [id])
   children Review[] @relation("ReviewReplies")
 
   createdAt DateTime @default(now())
+}
+
+model BookRating {
+  id        String   @id @default(uuid())
+  userId    String
+  bookId    String
+  rating    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
 }
