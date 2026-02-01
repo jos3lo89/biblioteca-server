@@ -1,5 +1,13 @@
 import { PrismaService } from '@/core/prisma/prisma.service';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { StudentRegisterDto } from './dto/student-register.dto';
+
+import bcryptjs from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -61,5 +69,61 @@ export class UsersService {
         prevPage: prev,
       },
     };
+  }
+
+  async registerStudent(dto: StudentRegisterDto) {
+    const studentFound = await this.prisma.user.findUnique({
+      where: { dni: dto.dni },
+    });
+
+    if (studentFound) {
+      throw new ConflictException('El DNI ya está registrado');
+    }
+
+    const periodExists = await this.prisma.period.findUnique({
+      where: { id: dto.periodId },
+    });
+
+    if (!periodExists) {
+      throw new NotFoundException('El período no existe');
+    }
+
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPwd = await bcryptjs.hash(dto.dni, salt);
+
+    try {
+      const newStudent = await this.prisma.user.create({
+        data: {
+          dni: dto.dni,
+          name: dto.name,
+          lastName: dto.lastName,
+          fullName: `${dto.name} ${dto.lastName}`,
+          role: 'STUDENT',
+          password: hashedPwd,
+          enrollments: {
+            create: {
+              periodId: dto.periodId,
+              canAccess: false,
+            },
+          },
+        },
+        omit: {
+          password: true,
+        },
+        include: {
+          enrollments: {
+            include: {
+              period: true,
+            },
+          },
+        },
+      });
+
+      return newStudent;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al registrar al estudiante y su matrícula',
+      );
+    }
   }
 }
