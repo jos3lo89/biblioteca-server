@@ -54,6 +54,28 @@ export class StorageService {
     return this.getFullUrl(bookKey);
   }
 
+  async getPresignedUrlForGet(
+    key: string,
+    expiresInSeconds: number = 86400, // 24 hours default for covers
+  ): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+
+    return getSignedUrl(this.s3Client, command, {
+      expiresIn: expiresInSeconds,
+    });
+  }
+
+  async getCoverPresignedUrl(coverKey: string): Promise<string> {
+    return this.getPresignedUrlForGet(coverKey, 86400); // 24 hours
+  }
+
+  async getBookPresignedUrl(bookKey: string): Promise<string> {
+    return this.getPresignedUrlForGet(bookKey, 3600); // 1 hour for books
+  }
+
   async uploadFile(
     file: Express.Multer.File,
     folder: string,

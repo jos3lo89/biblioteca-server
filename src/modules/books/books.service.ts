@@ -59,7 +59,7 @@ export class BooksService {
       return {
         ...book,
         coverUrl: book.coverKey
-          ? this.storageService.getCoverUrl(book.coverKey)
+          ? await this.storageService.getCoverPresignedUrl(book.coverKey)
           : null,
       };
     } catch (error) {
@@ -95,12 +95,14 @@ export class BooksService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return books.map((book) => ({
-      ...book,
-      coverUrl: book.coverKey
-        ? this.storageService.getCoverUrl(book.coverKey)
-        : null,
-    }));
+    return Promise.all(
+      books.map(async (book) => ({
+        ...book,
+        coverUrl: book.coverKey
+          ? await this.storageService.getCoverPresignedUrl(book.coverKey)
+          : null,
+      })),
+    );
   }
 
   async findOne(id: string) {
@@ -116,7 +118,7 @@ export class BooksService {
     return {
       ...book,
       coverUrl: book.coverKey
-        ? this.storageService.getCoverUrl(book.coverKey)
+        ? await this.storageService.getCoverPresignedUrl(book.coverKey)
         : null,
     };
   }
