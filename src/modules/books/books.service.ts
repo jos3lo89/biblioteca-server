@@ -165,10 +165,6 @@ export class BooksService {
       book.fileKey,
     );
 
-    return {
-      url: saveUrl.url,
-      expiresAt: saveUrl.expiresAt,
-      expira: new Date(saveUrl.expiresAt).toLocaleString('es-PE'),
-    };
+    return saveUrl;
   }
 }

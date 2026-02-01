@@ -16,12 +16,16 @@ const prisma = new PrismaClient({
 const userData: Prisma.UserCreateInput[] = [
   {
     dni: '11111111',
+    name: 'jose luis',
+    lastName: 'galindo cardenas',
     fullName: 'jose luis galindo cardenas',
     password: '123456',
     role: 'ADMIN',
   },
   {
     dni: '22222222',
+    name: 'lagarto',
+    lastName: 'estudioso',
     fullName: 'lagarto estudioso',
     password: '123456',
     role: 'STUDENT',
