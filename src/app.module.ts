@@ -10,6 +10,7 @@ import { PeriodsModule } from './modules/periods/periods.module';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
 import { BooksModule } from './modules/books/books.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { StorageModule } from './modules/storage/storage.module';
     EnrollmentsModule,
     BooksModule,
     StorageModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
