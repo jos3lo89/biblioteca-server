@@ -11,6 +11,7 @@ import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
 import { BooksModule } from './modules/books/books.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { RatingsModule } from './modules/ratings/ratings.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     BooksModule,
     StorageModule,
     ReviewsModule,
+    RatingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
