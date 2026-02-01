@@ -10,12 +10,8 @@ import {
   ParseUUIDPipe,
   BadRequestException,
   HttpStatus,
-  HttpCode,
 } from '@nestjs/common';
-import {
-  FileFieldsInterceptor,
-  FilesInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -43,7 +39,6 @@ export class BooksController {
     ),
   )
   async create(
-    @CurrentUser() user: CurrentUserI,
     @Body() body: CreateBookDto,
     @UploadedFiles()
     files: { cover?: Express.Multer.File[]; file?: Express.Multer.File[] },
@@ -91,5 +86,21 @@ export class BooksController {
     id: string,
   ) {
     return this.booksService.remove(id);
+  }
+
+  @Get(':id/read')
+  readBook(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+        exceptionFactory() {
+          return new BadRequestException('id no valido');
+        },
+      }),
+    )
+    bookId: string,
+  ) {
+    return this.booksService.readBook(bookId);
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { CreatedDto } from './dto/created.dto';
 import { CategoriesService } from './categories.service';
 import { Auth } from '@/common/decorators/auth.decorator';
@@ -12,5 +12,11 @@ export class CategoriesController {
   @Auth(UserRole.ADMIN)
   created(@Body() body: CreatedDto) {
     return this.categorieService.created(body);
+  }
+
+  @Get()
+  @Auth()
+  getAllCategories() {
+    return this.categorieService.getAllCategories();
   }
 }

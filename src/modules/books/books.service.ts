@@ -35,6 +35,9 @@ export class BooksService {
       const bookResult = await this.storageService.uploadBook(bookFile);
       bookKey = bookResult.key;
 
+      const validatedCoverKey = coverKey!;
+      const validatedBookKey = bookKey!;
+
       const book = await this.prisma.$transaction(async (tx) => {
         return tx.book.create({
           data: {
@@ -43,15 +46,22 @@ export class BooksService {
             description: dto.description,
             categoryId: dto.categoryId,
             isDownloadable: dto.isDownloadable,
-            coverUrl: coverResult.url,
-            fileKey: bookResult.key,
+            coverKey: validatedCoverKey,
+            fileKey: validatedBookKey,
           },
         });
       });
 
       this.logger.log(`Libro creado: ${book.id} - ${book.title}`);
 
-      return book;
+      console.log('libro creado wadafa: ', book);
+
+      return {
+        ...book,
+        coverUrl: book.coverKey
+          ? this.storageService.getCoverUrl(book.coverKey)
+          : null,
+      };
     } catch (error) {
       this.logger.error(
         `Error creando libro, realizando rollback: ${error.message}`,
@@ -80,10 +90,17 @@ export class BooksService {
   }
 
   async findAll() {
-    return this.prisma.book.findMany({
+    const books = await this.prisma.book.findMany({
       include: { category: true },
       orderBy: { createdAt: 'desc' },
     });
+
+    return books.map((book) => ({
+      ...book,
+      coverUrl: book.coverKey
+        ? this.storageService.getCoverUrl(book.coverKey)
+        : null,
+    }));
   }
 
   async findOne(id: string) {
@@ -96,23 +113,33 @@ export class BooksService {
       throw new NotFoundException('Libro no encontrado');
     }
 
-    return book;
+    return {
+      ...book,
+      coverUrl: book.coverKey
+        ? this.storageService.getCoverUrl(book.coverKey)
+        : null,
+    };
   }
 
   async remove(id: string) {
-    const book = await this.findOne(id);
-
-    await this.prisma.$transaction(async (tx) => {
-      await tx.book.delete({ where: { id } });
+    const book = await this.prisma.book.findUnique({
+      where: {
+        id,
+      },
     });
 
+    if (!book) {
+      throw new NotFoundException('Libro no encontrado');
+    }
+
     try {
-      await this.storageService.deleteFile(book.fileKey);
-      if (book.coverUrl) {
-        const coverKey = book.coverUrl.split('/').pop();
-        if (coverKey) {
-          await this.storageService.deleteFile(coverKey);
-        }
+      const bookDelete = await this.prisma.book.delete({
+        where: { id },
+      });
+
+      await this.storageService.deleteFile(bookDelete.fileKey);
+      if (bookDelete.coverKey) {
+        await this.storageService.deleteFile(bookDelete.coverKey);
       }
     } catch (error) {
       this.logger.error(
@@ -121,5 +148,27 @@ export class BooksService {
     }
 
     return { message: 'Libro eliminado' };
+  }
+
+  async readBook(bookId: string) {
+    const book = await this.prisma.book.findUnique({
+      where: {
+        id: bookId,
+      },
+    });
+
+    if (!book) {
+      throw new NotFoundException('Libro no encontrado');
+    }
+
+    const saveUrl = await this.storageService.generateReadPresignedUrl(
+      book.fileKey,
+    );
+
+    return {
+      url: saveUrl.url,
+      expiresAt: saveUrl.expiresAt,
+      expira: new Date(saveUrl.expiresAt).toLocaleString('es-PE'),
+    };
   }
 }

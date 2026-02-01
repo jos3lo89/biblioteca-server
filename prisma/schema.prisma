@@ -75,8 +75,8 @@ model Book {
   title          String
   author         String
   description    String?  @db.Text
-  coverUrl       String? // Portada pública
-  fileKey        String // LLAVE PRIVADA en MinIO (no la URL)
+  coverKey       String?
+  fileKey        String
   isDownloadable Boolean  @default(false)
   categoryId     String
   category       Category @relation(fields: [categoryId], references: [id])

@@ -46,12 +46,19 @@ export class StorageService {
     return `${this.endpoint}:${this.port}/${this.bucket}/${key}`;
   }
 
+  getCoverUrl(coverKey: string): string {
+    return this.getFullUrl(coverKey);
+  }
+
+  getBookUrl(bookKey: string): string {
+    return this.getFullUrl(bookKey);
+  }
+
   async uploadFile(
     file: Express.Multer.File,
     folder: string,
-    filename?: string,
   ): Promise<{ key: string; url: string }> {
-    const key = `${folder}/${filename || uuidv4()}-${Date.now()}`;
+    const key = `${folder}/${uuidv4()}-${Date.now()}`;
 
     const command = new PutObjectCommand({
       Bucket: this.bucket,

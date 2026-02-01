@@ -21,4 +21,18 @@ export class CategoriesService {
 
     return categoryNew;
   }
+
+  async getAllCategories() {
+    const categories = await this.prisma.category.findMany({
+      include: {
+        _count: {
+          select: {
+            books: true,
+          },
+        },
+      },
+    });
+
+    return categories;
+  }
 }
