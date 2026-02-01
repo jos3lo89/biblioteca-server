@@ -88,7 +88,7 @@ model Book {
 }
 
 model Review {
-  id       String  @id @default(ulid())
+  id       String  @id @default(uuid())
   content  String
   rating   Int? // 1-5
   userId   String
