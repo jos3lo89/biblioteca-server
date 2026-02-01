@@ -24,6 +24,7 @@ export class PeriodsController {
   @Post()
   @Auth(UserRole.ADMIN)
   created(@Body() body: CreatedDto) {
+    // TODO: verifcar que solo haya un current period
     return this.periodService.created(body);
   }
 
