@@ -9,7 +9,7 @@ import { StudentRegisterDto } from './dto/student-register.dto';
 
 import bcryptjs from 'bcryptjs';
 import { FindUsersQueryDto } from './dto/find-users-query.dto';
-import { Prisma } from '@/generated/prisma/client';
+import { Prisma, UserRole } from '@/generated/prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -29,12 +29,12 @@ export class UsersService {
     return result;
   }
 
-  async getAllStudents(query: FindUsersQueryDto) {
+  async getUsersWithRole(role: UserRole, query: FindUsersQueryDto) {
     const { page = 1, limit = 5, search } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.UserWhereInput = {
-      role: 'STUDENT',
+      role: role,
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' } },

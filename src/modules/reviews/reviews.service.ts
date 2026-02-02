@@ -81,14 +81,37 @@ export class ReviewsService {
   }
 
   async findByBook(bookId: string): Promise<ReviewTreeNode[]> {
+    // const rootReviews = await this.prisma.review.findMany({
+    //   where: { bookId, parentId: null },
+    //   include: {
+    //     user: { select: { id: true, name: true, lastName: true } },
+    //     children: {
+    //       include: {
+    //         user: { select: { id: true, name: true, lastName: true } },
+    //         children: true,
+    //       },
+    //     },
+    //   },
+    //   orderBy: { createdAt: 'desc' },
+    // });
+
     const rootReviews = await this.prisma.review.findMany({
       where: { bookId, parentId: null },
       include: {
+        // Nivel 1 (Raíz)
         user: { select: { id: true, name: true, lastName: true } },
         children: {
           include: {
+            // Nivel 2 (Hijos)
             user: { select: { id: true, name: true, lastName: true } },
-            children: true,
+            children: {
+              include: {
+                // Nivel 3 (Nietos) - ESTO FALTABA
+                user: { select: { id: true, name: true, lastName: true } },
+                // Si quisieras un 4to nivel, seguirías anidando aquí
+                children: true,
+              },
+            },
           },
         },
       },
