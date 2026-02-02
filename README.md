@@ -1,94 +1,121 @@
 # Biblioteca Server API
 
-Backend para sistema de biblioteca digital con autenticación, gestión de libros, comentarios jerárquicos, calificaciones y más.
+Backend para sistema de biblioteca digital con autenticación JWT, gestión de libros, comentarios jerárquicos, calificaciones y almacenamiento en MinIO/S3.
 
-## Tech Stack
+## Tabla de Contenidos
 
-- **Framework:** NestJS + TypeScript
-- **Database:** PostgreSQL + Prisma ORM
-- **Storage:** MinIO/S3 compatible (libros y portadas)
-- **Authentication:** JWT en cookies
-- **Testing:** Jest
+- [Descripción del Proyecto](#descripción-del-proyecto)
+- [Tecnologías](#tecnologías)
+- [Requisitos](#requisitos)
+- [Instalación sin Docker](#instalación-sin-docker)
+- [Instalación con Docker](#instalación-con-docker)
+- [Variables de Entorno](#variables-de-entorno)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Endpoints de la API](#endpoints-de-la-api)
+- [Modelo de Datos](#modelo-de-datos)
+- [Roles y Permisos](#roles-y-permisos)
+- [Comandos Útiles](#comandos-útiles)
+
+---
+
+## Descripción del Proyecto
+
+Biblioteca Server es un backend desarrollado en NestJS que proporciona una API completa para la gestión de una biblioteca digital. Permite:
+
+- **Autenticación**: Login/Logout con JWT almacenado en cookies HttpOnly
+- **Gestión de Usuarios**: Perfiles de estudiantes y administradores
+- **Catálogo de Libros**: CRUD de libros con portadas y archivos PDF
+- **Categorías**: Organización de libros por materias
+- **Períodos Académicos**: Gestión de ciclos escolares (ej: 2026-I)
+- **Matrículas**: Control de acceso de estudiantes a libros
+- **Comentarios**: Sistema de reviews jerárquicos (respuestas a respuestas)
+- **Calificaciones**: Rating con estrellas (1-5) por libro
+- **Dashboard**: Estadísticas para administradores
+
+---
+
+## Tecnologías
+
+| Tecnología     | Propósito                                  |
+| -------------- | ------------------------------------------ |
+| **NestJS**     | Framework Node.js con TypeScript           |
+| **TypeScript** | Tipado estático                            |
+| **PostgreSQL** | Base de datos relacional                   |
+| **Prisma ORM** | ORM para PostgreSQL                        |
+| **MinIO/S3**   | Almacenamiento de archivos (PDF, portadas) |
+| **JWT**        | Autenticación basada en tokens             |
+| **Jest**       | Framework de testing                       |
+| **Docker**     | Contenedores para servicios externos       |
+
+---
 
 ## Requisitos
 
-- Node.js 20+
-- PostgreSQL 15+
-- MinIO (o cualquier servidor S3 compatible)
-- Docker y Docker Compose (para servicios locales)
+| Requisito      | Versión Mínima | Descripción                              |
+| -------------- | -------------- | ---------------------------------------- |
+| Node.js        | 20+            | Entorno de ejecución JavaScript          |
+| PostgreSQL     | 15+            | Servidor de base de datos                |
+| MinIO          | Latest         | Servidor de almacenamiento S3-compatible |
+| npm/yarn       | Latest         | Gestor de paquetes                       |
+| Docker         | Latest         | Contenedores (opcional)                  |
+| Docker Compose | Latest         | Orquestación de contenedores (opcional)  |
 
-## Variables de Entorno
+---
 
-Crear archivo `.env` en la raíz del proyecto:
+## Instalación sin Docker
 
-```env
-# Database
-DATABASE_URL="postgresql://rem:rem123@localhost:6000/bibliotecadb?schema=public"
-
-# Server
-NODE_ENV="development"
-PORT=5000
-API_PREFIX="api/v1"
-
-# JWT
-JWT_SECRET="tu_jwt_secret_super_seguro_aqui"
-
-# CORS
-CORS_ORIGINS="http://localhost:5173,http://localhost:3000"
-
-# MinIO / S3
-S3_ENDPOINT="http://localhost"
-S3_PORT=6002
-S3_ACCESS_KEY="adminbiblioteca"
-S3_SECRET_KEY="biblio123456"
-S3_BUCKET="biblioteca-books"
-S3_REGION="us-east-1"
-
-# Upload Limits (bytes)
-MAX_COVER_SIZE=5242880       # 5MB
-MAX_BOOK_FILE_SIZE=104857600 # 100MB
-
-# Other
-PRESIGNED_URL_EXPIRY_MINUTES=15
-```
-
-## Levantar Servicios Locales
-
-### Con Docker Compose (PostgreSQL + pgAdmin + MinIO)
+### 1. Instalar Dependencias
 
 ```bash
-cd biblioteca-db
-docker compose up -d
+# Clonar el repositorio
+git clone <repo-url>
+cd biblioteca-server
+
+# Instalar dependencias
+npm install
 ```
 
-Servicios disponibles:
+### 2. Configurar Base de Datos PostgreSQL
 
-| Servicio      | URL                   | Puerto |
-| ------------- | --------------------- | ------ |
-| PostgreSQL    | localhost             | 6000   |
-| pgAdmin       | http://localhost:6001 | 6001   |
-| MinIO API     | http://localhost:6002 | 6002   |
-| MinIO Console | http://localhost:6003 | 6003   |
+Asegúrate de tener PostgreSQL corriendo y crea la base de datos:
 
-Credenciales MinIO:
+```sql
+CREATE DATABASE bibliotecadb;
+```
 
-- User: `adminbiblioteca`
-- Password: `biblio123456`
+### 3. Configurar MinIO
 
-## Configuración de Base de Datos
+Instala MinIO o usa un servicio S3 compatible. Necesitarás:
+
+- Endpoint: `http://localhost`
+- Puerto API: `9000`
+- Console: `9001`
+- Bucket: `biblioteca-books`
+
+### 4. Configurar Variables de Entorno
+
+Copia el archivo `.env.example` a `.env` y configura:
 
 ```bash
-# Generar cliente Prisma (después de cambios en schema)
+cp .env.example .env
+```
+
+Edita el archivo `.env` con tus valores (ver sección [Variables de Entorno](#variables-de-entorno)).
+
+### 5. Generar Cliente Prisma y Migraciones
+
+```bash
+# Generar el cliente Prisma
 npx prisma generate
 
-# Ejecutar migraciones
+# Ejecutar migraciones (crea las tablas)
 npx prisma migrate dev
 
-# Ver UI de Prisma Studio
+# (Opcional) Ver UI de Prisma Studio
 npx prisma studio
 ```
 
-## Ejecutar el Servidor
+### 6. Iniciar el Servidor
 
 ```bash
 # Desarrollo con hot-reload
@@ -97,67 +124,277 @@ npm run start:dev
 # Producción
 npm run build
 npm run start:prod
-
-# Solo lint y format
-npm run lint
-npm run format
 ```
 
-## Tests
+El servidor estará disponible en `http://localhost:5000`
+
+---
+
+## Instalación con Docker
+
+### 1. Levantar Servicios de Infraestructura
+
+El proyecto incluye un directorio `biblioteca-db` con Docker Compose para PostgreSQL, pgAdmin y MinIO:
 
 ```bash
-# Todos los tests
-npm run test
-
-# Tests en modo watch
-npm run test:watch
-
-# Coverage
-npm run test:cov
-
-# Tests e2e
-npm run test:e2e
+cd biblioteca-db
+docker compose up -d
 ```
+
+### 2. Servicios Disponibles
+
+| Servicio      | URL                   | Puerto |
+| ------------- | --------------------- | ------ |
+| PostgreSQL    | localhost             | 6000   |
+| pgAdmin       | http://localhost:6001 | 6001   |
+| MinIO API     | localhost             | 6002   |
+| MinIO Console | http://localhost:6003 | 6003   |
+
+### 3. Credenciales
+
+**PostgreSQL:**
+
+- Usuario: `rem`
+- Contraseña: `rem123`
+- Base de datos: `bibliotecadb`
+
+**pgAdmin:**
+
+- Email: `haru@rem.com`
+- Contraseña: `rem123`
+
+**MinIO:**
+
+- Usuario: `adminbiblioteca`
+- Contraseña: `biblio123456`
+
+### 4. Crear Bucket en MinIO
+
+Abre MinIO Console en `http://localhost:6003` y crea el bucket `biblioteca-books`.
+
+### 5. Iniciar la Aplicación
+
+```bash
+# Desde el directorio principal
+npm install
+npx prisma generate
+npx prisma migrate dev
+npm run start:dev
+```
+
+---
+
+## Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+# ============================================
+# BASE DE DATOS
+# ============================================
+DATABASE_URL="postgresql://rem:rem123@localhost:6000/bibliotecadb?schema=public"
+
+# ============================================
+# SERVIDOR
+# ============================================
+NODE_ENV="development"
+PORT=5000
+API_PREFIX="api/v1"
+
+# ============================================
+# AUTENTICACIÓN JWT
+# ============================================
+JWT_SECRET="tu_jwt_secret_super_seguro_aqui"
+
+# ============================================
+# CORS
+# ============================================
+CORS_ORIGINS="http://localhost:5173,http://localhost:3000"
+
+# ============================================
+# MINIO / S3
+# ============================================
+S3_ENDPOINT="http://localhost"
+S3_PORT=6002
+S3_ACCESS_KEY="adminbiblioteca"
+S3_SECRET_KEY="biblio123456"
+S3_BUCKET="biblioteca-books"
+S3_REGION="us-east-1"
+
+# ============================================
+# LÍMITES DE SUBIDA
+# ============================================
+MAX_COVER_SIZE=5242880       # 5MB en bytes
+MAX_BOOK_FILE_SIZE=104857600 # 100MB en bytes
+
+# ============================================
+# TIPOS DE ARCHIVOS PERMITIDOS
+# ============================================
+ALLOWED_COVER_TYPES="image/jpeg,image/png,image/webp"
+ALLOWED_BOOK_TYPE="application/pdf"
+
+# ============================================
+# OTRAS CONFIGURACIONES
+# ============================================
+PRESIGNED_URL_EXPIRY_MINUTES=15
+```
+
+### Descripción de Cada Variable
+
+| Variable                       | Descripción                          | Valor por Defecto |
+| ------------------------------ | ------------------------------------ | ----------------- |
+| `DATABASE_URL`                 | Connection string de PostgreSQL      | Requerido         |
+| `NODE_ENV`                     | Entorno: development/production      | development       |
+| `PORT`                         | Puerto del servidor                  | 5000              |
+| `API_PREFIX`                   | Prefijo global de la API             | api/v1            |
+| `JWT_SECRET`                   | Clave secreta para firmar JWTs       | Requerido         |
+| `CORS_ORIGINS`                 | Origins permitidos para CORS         | localhost:5173    |
+| `S3_ENDPOINT`                  | URL del servidor S3/MinIO            | http://localhost  |
+| `S3_PORT`                      | Puerto del API S3                    | 6002              |
+| `S3_ACCESS_KEY`                | Access key de S3                     | Requerido         |
+| `S3_SECRET_KEY`                | Secret key de S3                     | Requerido         |
+| `S3_BUCKET`                    | Bucket de S3 para archivos           | biblioteca-books  |
+| `S3_REGION`                    | Región de S3                         | us-east-1         |
+| `MAX_COVER_SIZE`               | Tamaño máximo de portadas            | 5MB               |
+| `MAX_BOOK_FILE_SIZE`           | Tamaño máximo de PDFs                | 100MB             |
+| `ALLOWED_COVER_TYPES`          | Tipos MIME para portadas             | jpeg, png, webp   |
+| `ALLOWED_BOOK_TYPE`            | Tipos MIME para libros               | application/pdf   |
+| `PRESIGNED_URL_EXPIRY_MINUTES` | Minutos de vigencia de URLs firmadas | 15                |
+
+---
 
 ## Estructura del Proyecto
 
 ```
-src/
-├── app.module.ts              # Módulo principal
-├── main.ts                    # Entry point
-├── core/
-│   └── prisma/               # PrismaService
-├── common/
-│   ├── decorators/           # @Auth(), @CurrentUser()
-│   ├── guards/               # RolesGuard, JwtAuthGuard
-│   └── interfaces/           # CurrentUserI
-├── generated/prisma/         # Cliente Prisma generado
-└── modules/
-    ├── auth/                 # Autenticación (login, register)
-    ├── users/                # Perfil de usuario
-    ├── categories/           # Categorías de libros
-    ├── periods/              # Períodos académicos
-    ├── enrollments/          # Matrículas de alumnos
-    ├── books/                # Gestión de libros
-    ├── storage/              # Subida de archivos (MinIO/S3)
-    ├── reviews/              # Comentarios jerárquicos
-    └── ratings/              # Calificaciones con estrellas
+biblioteca-server/
+├── src/
+│   ├── main.ts                        # Punto de entrada
+│   ├── app.module.ts                  # Módulo principal
+│   ├── app.controller.ts              # Controlador raíz (health check)
+│   ├── core/
+│   │   └── prisma/
+│   │       ├── prisma.module.ts       # Módulo Prisma
+│   │       └── prisma.service.ts      # Servicio Prisma (cliente DB)
+│   ├── common/
+│   │   ├── decorators/
+│   │   │   ├── auth.decorator.ts      # @Auth() - Protege rutas
+│   │   │   └── current-user.decorator.ts # @CurrentUser() - Usuario actual
+│   │   ├── guards/
+│   │   │   ├── jwt-auth.guard.ts      # Valida JWT
+│   │   │   └── roles.guard.ts         # Verifica roles
+│   │   └── interfaces/
+│   │       └── current-user.interface.ts # Tipo CurrentUserI
+│   ├── generated/
+│   │   └── prisma/                    # Cliente Prisma generado
+│   └── modules/
+│       ├── auth/                      # Autenticación
+│       │   ├── auth.controller.ts
+│       │   ├── auth.service.ts
+│       │   ├── auth.module.ts
+│       │   ├── dto/
+│       │   │   ├── login.dto.ts
+│       │   │   └── register.dto.ts
+│       │   └── strategies/
+│       │       └── jwt.strategy.ts
+│       ├── users/                     # Gestión de usuarios
+│       │   ├── users.controller.ts
+│       │   ├── users.service.ts
+│       │   ├── users.module.ts
+│       │   └── dto/
+│       │       ├── student-register.dto.ts
+│       │       └── find-users-query.dto.ts
+│       ├── categories/                # Categorías de libros
+│       │   ├── categories.controller.ts
+│       │   ├── categories.service.ts
+│       │   ├── categories.module.ts
+│       │   └── dto/
+│       │       ├── created.dto.ts
+│       │       └── find-category-query.dto.ts
+│       ├── periods/                   # Períodos académicos
+│       │   ├── periods.controller.ts
+│       │   ├── periods.service.ts
+│       │   ├── periods.module.ts
+│       │   └── dto/
+│       │       └── created.dto.ts
+│       ├── enrollments/               # Matrículas
+│       │   ├── enrollments.controller.ts
+│       │   ├── enrollments.service.ts
+│       │   ├── enrollments.module.ts
+│       │   └── dto/
+│       │       └── created.dto.ts
+│       ├── books/                     # Libros
+│       │   ├── books.controller.ts
+│       │   ├── books.service.ts
+│       │   ├── books.module.ts
+│       │   └── dto/
+│       │       ├── create-book.dto.ts
+│       │       ├── book-response.dto.ts
+│       │       └── find-books-query.dto.ts
+│       ├── reviews/                   # Comentarios/Reseñas
+│       │   ├── reviews.controller.ts
+│       │   ├── reviews.service.ts
+│       │   ├── reviews.module.ts
+│       │   └── dto/
+│       │       ├── create-review.dto.ts
+│       │       └── review-response.dto.ts
+│       ├── ratings/                   # Calificaciones
+│       │   ├── ratings.controller.ts
+│       │   ├── ratings.service.ts
+│       │   ├── ratings.module.ts
+│       │   └── dto/
+│       │       ├── set-rating.dto.ts
+│       │       └── rating-response.dto.ts
+│       ├── dashboard/                 # Estadísticas
+│       │   ├── dashboard.controller.ts
+│       │   ├── dashboard.service.ts
+│       │   └── dashboard.module.ts
+│       └── storage/                   # Almacenamiento S3
+│           ├── storage.service.ts
+│           ├── storage.module.ts
+│           ├── constants/
+│           │   └── file.constants.ts
+│           └── dto/
+│               └── delete-file.dto.ts
+├── prisma/
+│   ├── schema.prisma                  # Definición del modelo de datos
+│   └── seed.ts                        # Semilla de datos
+├── biblioteca-db/
+│   └── compose.yml                    # Docker Compose para servicios
+├── test/
+│   ├── jest-e2e.json                  # Configuración e2e
+├── .env                               # Variables de entorno
+├── .env.example                       # Ejemplo de .env
+├── package.json
+├── tsconfig.json
+├── nest-cli.json
+└── docker-compose.yml                 # Docker Compose alternativo
 ```
 
-## API Endpoints
+---
 
-### Autenticación
+## Endpoints de la API
 
-| Método | Endpoint                | Auth | Descripción              |
-| ------ | ----------------------- | ---- | ------------------------ |
-| POST   | `/api/v1/auth/register` | No   | Registrar usuario        |
-| POST   | `/api/v1/auth/login`    | No   | Iniciar sesión           |
-| POST   | `/api/v1/auth/logout`   | No   | Cerrar sesión            |
-| GET    | `/api/v1/auth/me`       | JWT  | Datos del usuario actual |
+### Prefijo Base
 
-**Register:**
+Todos los endpoints tienen el prefijo: `/api/v1`
 
-```json
+---
+
+### Módulo: Autenticación
+
+| Método | Endpoint                | Auth  | Descripción             |
+| ------ | ----------------------- | ----- | ----------------------- |
+| POST   | `/api/v1/auth/register` | ADMIN | Registrar nuevo usuario |
+| POST   | `/api/v1/auth/login`    | No    | Iniciar sesión          |
+| POST   | `/api/v1/auth/logout`   | JWT   | Cerrar sesión           |
+| GET    | `/api/v1/auth/me`       | JWT   | Obtener usuario actual  |
+
+#### Registrar Usuario (ADMIN)
+
+```http
+POST /api/v1/auth/register
+Content-Type: application/json
+
 {
   "dni": "12345678",
   "name": "Juan",
@@ -167,78 +404,178 @@ src/
 }
 ```
 
-**Login:**
+#### Iniciar Sesión
 
-```json
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
 {
   "dni": "12345678",
   "password": "password123"
 }
 ```
 
----
-
-### Usuarios
-
-| Método | Endpoint                | Auth | Descripción           |
-| ------ | ----------------------- | ---- | --------------------- |
-| GET    | `/api/v1/users/profile` | JWT  | Obtener perfil propio |
+**Respuesta:** Cookie `Authentication` establecida (HttpOnly, 12 horas)
 
 ---
 
-### Categorías
+### Módulo: Usuarios
 
-| Método | Endpoint                 | Auth  | Descripción        |
-| ------ | ------------------------ | ----- | ------------------ |
-| GET    | `/api/v1/categories`     | No    | Listar categorías  |
-| POST   | `/api/v1/categories`     | ADMIN | Crear categoría    |
-| GET    | `/api/v1/categories/:id` | No    | Obtener categoría  |
-| DELETE | `/api/v1/categories/:id` | ADMIN | Eliminar categoría |
+| Método | Endpoint                          | Auth  | Descripción             |
+| ------ | --------------------------------- | ----- | ----------------------- |
+| GET    | `/api/v1/users/profile`           | JWT   | Obtener perfil propio   |
+| GET    | `/api/v1/users/:role/with-role`   | ADMIN | Listar usuarios por rol |
+| POST   | `/api/v1/users/students/register` | ADMIN | Registrar estudiante    |
+
+#### Obtener Perfil Propio
+
+```http
+GET /api/v1/users/profile
+Authorization: Bearer <token>
+```
+
+**Respuesta:**
+
+```json
+{
+  "id": "uuid",
+  "dni": "12345678",
+  "name": "Juan",
+  "lastName": "Perez",
+  "fullName": "Juan Perez",
+  "role": "STUDENT"
+}
+```
+
+#### Listar Usuarios por Rol
+
+```http
+GET /api/v1/users/STUDENT/with-role?page=1&limit=10
+Authorization: Bearer <token_admin>
+```
 
 ---
 
-### Períodos
+### Módulo: Categorías
 
-| Método | Endpoint                      | Auth  | Descripción        |
-| ------ | ----------------------------- | ----- | ------------------ |
-| POST   | `/api/v1/periods`             | ADMIN | Crear período      |
-| GET    | `/api/v1/periods`             | No    | Listar períodos    |
-| PATCH  | `/api/v1/periods/:id/current` | ADMIN | Marcar como actual |
+| Método | Endpoint                 | Auth  | Descripción                  |
+| ------ | ------------------------ | ----- | ---------------------------- |
+| GET    | `/api/v1/categories`     | JWT   | Listar categorías (paginado) |
+| GET    | `/api/v1/categories/all` | JWT   | Listar todas las categorías  |
+| POST   | `/api/v1/categories`     | ADMIN | Crear categoría              |
+
+#### Crear Categoría
+
+```http
+POST /api/v1/categories
+Authorization: Bearer <token_admin>
+Content-Type: application/json
+
+{
+  "name": "Matemáticas"
+}
+```
+
+**Respuesta:**
+
+```json
+{
+  "id": "uuid",
+  "name": "Matemáticas",
+  "slug": "matematicas",
+  "createdAt": "2026-01-31T10:00:00Z"
+}
+```
 
 ---
 
-### Matrículas
+### Módulo: Períodos Académicos
 
-| Método | Endpoint              | Auth    | Descripción             |
-| ------ | --------------------- | ------- | ----------------------- |
-| POST   | `/api/v1/enrollments` | STUDENT | Matricularse en período |
-| GET    | `/api/v1/enrollments` | ADMIN   | Listar matrículas       |
+| Método | Endpoint                      | Auth  | Descripción                |
+| ------ | ----------------------------- | ----- | -------------------------- |
+| POST   | `/api/v1/periods`             | ADMIN | Crear período              |
+| GET    | `/api/v1/periods`             | ADMIN | Listar períodos (paginado) |
+| PATCH  | `/api/v1/periods/:id/current` | ADMIN | Marcar como actual         |
+
+#### Crear Período
+
+```http
+POST /api/v1/periods
+Authorization: Bearer <token_admin>
+Content-Type: application/json
+
+{
+  "name": "2026-I",
+  "startDate": "2026-01-01",
+  "endDate": "2026-06-30"
+}
+```
+
+#### Marcar Período como Actual
+
+```http
+PATCH /api/v1/periods/:id/current
+Authorization: Bearer <token_admin>
+```
 
 ---
 
-### Libros
+### Módulo: Matrículas
 
-| Método | Endpoint                 | Auth  | Descripción                                |
-| ------ | ------------------------ | ----- | ------------------------------------------ |
-| GET    | `/api/v1/books`          | No    | Listar libros (con filtros)                |
-| GET    | `/api/v1/books/:id`      | No    | Obtener libro                              |
-| POST   | `/api/v1/books`          | ADMIN | Crear libro (multipart/form-data)          |
-| DELETE | `/api/v1/books/:id`      | ADMIN | Eliminar libro                             |
-| GET    | `/api/v1/books/:id/read` | JWT   | URL firmada para leer (requiere matrícula) |
+| Método | Endpoint              | Auth  | Descripción       |
+| ------ | --------------------- | ----- | ----------------- |
+| POST   | `/api/v1/enrollments` | ADMIN | Crear matrícula   |
+| GET    | `/api/v1/enrollments` | ADMIN | Listar matrículas |
 
-**Crear Libro (POST /api/v1/books):**
+#### Crear Matrícula
 
-Content-Type: `multipart/form-data`
+```http
+POST /api/v1/enrollments
+Authorization: Bearer <token_admin>
+Content-Type: application/json
 
-| Campo          | Tipo    | Descripción                                 |
-| -------------- | ------- | ------------------------------------------- |
-| title          | string  | Título del libro                            |
-| author         | string  | Autor                                       |
-| description    | string  | Descripción (opcional)                      |
-| categoryId     | UUID    | ID de categoría                             |
-| isDownloadable | boolean | Permitir descarga                           |
-| files[cover]   | File    | Imagen de portada (jpg, png, webp, max 5MB) |
-| files[file]    | File    | PDF del libro (max 100MB)                   |
+{
+  "userId": "uuid-del-estudiante",
+  "periodId": "uuid-del-periodo"
+}
+```
+
+---
+
+### Módulo: Libros
+
+| Método | Endpoint                 | Auth  | Descripción             |
+| ------ | ------------------------ | ----- | ----------------------- |
+| GET    | `/api/v1/books`          | JWT   | Listar libros (filtros) |
+| GET    | `/api/v1/books/:id`      | JWT   | Obtener libro           |
+| POST   | `/api/v1/books`          | ADMIN | Crear libro             |
+| DELETE | `/api/v1/books/:id`      | ADMIN | Eliminar libro          |
+| GET    | `/api/v1/books/:id/read` | JWT   | URL firmada para leer   |
+
+#### Listar Libros (Filtros)
+
+```http
+GET /api/v1/books?page=1&limit=10&categoryId=uuid&search=algebra
+Authorization: Bearer <token>
+```
+
+#### Crear Libro (Multipart/Form-Data)
+
+```http
+POST /api/v1/books
+Authorization: Bearer <token_admin>
+Content-Type: multipart/form-data
+
+Campos del formulario:
+- title: string (requerido)
+- author: string (requerido)
+- description: string (opcional)
+- categoryId: UUID (requerido)
+- isDownloadable: boolean (opcional, default: false)
+- cover: File (jpg, png, webp, max 5MB)
+- file: File (PDF, max 100MB)
+```
 
 **Respuesta:**
 
@@ -253,23 +590,39 @@ Content-Type: `multipart/form-data`
 }
 ```
 
----
+#### Leer Libro (URL Firmada)
 
-### Comentarios (Reviews)
+```http
+GET /api/v1/books/:id/read
+Authorization: Bearer <token>
 
-| Método | Endpoint                                | Auth | Descripción                |
-| ------ | --------------------------------------- | ---- | -------------------------- |
-| GET    | `/api/v1/reviews/books/:bookId/reviews` | No   | Listar comentarios (árbol) |
-| POST   | `/api/v1/reviews/books/:bookId/reviews` | JWT  | Crear comentario/respuesta |
-| DELETE | `/api/v1/reviews/:id`                   | JWT  | Eliminar comentario        |
+# Requiere matrícula activa en el período actual
+```
 
-**Crear Comentario:**
+**Respuesta:**
 
 ```json
 {
-  "content": "Excelente libro, muy recomendado",
-  "parentId": "uuid" // omitir para comentario raíz, incluir para respuesta
+  "url": "https://...presigned-url...",
+  "expiresAt": "2026-01-31T10:15:00Z"
 }
+```
+
+---
+
+### Módulo: Comentarios (Reviews)
+
+| Método | Endpoint                        | Auth | Descripción                |
+| ------ | ------------------------------- | ---- | -------------------------- |
+| GET    | `/api/v1/reviews/:bookId/books` | JWT  | Listar comentarios (árbol) |
+| POST   | `/api/v1/reviews/:bookId/books` | JWT  | Crear comentario/respuesta |
+| DELETE | `/api/v1/reviews/:id`           | JWT  | Eliminar comentario        |
+
+#### Listar Comentarios (Estructura Jerárquica)
+
+```http
+GET /api/v1/reviews/:bookId/books
+Authorization: Bearer <token>
 ```
 
 **Respuesta (árbol):**
@@ -298,25 +651,42 @@ Content-Type: `multipart/form-data`
 }
 ```
 
+#### Crear Comentario
+
+```http
+POST /api/v1/reviews/:bookId/books
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "content": "Excelente libro, muy recomendado",
+  "parentId": "uuid" // omitir para comentario raíz, incluir para respuesta
+}
+```
+
 ---
 
-### Calificaciones (Ratings)
+### Módulo: Calificaciones (Ratings)
 
-| Método | Endpoint                                  | Auth  | Descripción                  |
-| ------ | ----------------------------------------- | ----- | ---------------------------- |
-| POST   | `/api/v1/ratings/books/:bookId`           | JWT   | Calificar libro (toggle 1-5) |
-| GET    | `/api/v1/ratings/books/:bookId/my-rating` | JWT   | Ver mi calificación          |
-| GET    | `/api/v1/ratings/books/:bookId/summary`   | ADMIN | Ver promedio y total         |
+| Método | Endpoint                            | Auth  | Descripción              |
+| ------ | ----------------------------------- | ----- | ------------------------ |
+| POST   | `/api/v1/ratings/:bookId/books`     | JWT   | Calificar libro (toggle) |
+| GET    | `/api/v1/ratings/:bookId/my-rating` | JWT   | Ver mi calificación      |
+| GET    | `/api/v1/ratings/:bookId/summary`   | ADMIN | Ver promedio y total     |
 
-**Calificar (POST):**
+#### Calificar Libro (Toggle)
 
-```json
+```http
+POST /api/v1/ratings/:bookId/books
+Authorization: Bearer <token>
+Content-Type: application/json
+
 {
   "rating": 4
 }
 ```
 
-**Toggle behavior:**
+**Comportamiento Toggle:**
 
 - Si ya tiene rating 4 y envía 4 → Elimina rating
 - Si ya tiene rating 3 y envía 4 → Actualiza a 4
@@ -331,7 +701,14 @@ Content-Type: `multipart/form-data`
 }
 ```
 
-**Resumen (ADMIN):**
+#### Ver Resumen (ADMIN)
+
+```http
+GET /api/v1/ratings/:bookId/summary
+Authorization: Bearer <token_admin>
+```
+
+**Respuesta:**
 
 ```json
 {
@@ -342,19 +719,37 @@ Content-Type: `multipart/form-data`
 
 ---
 
-### Storage (Archivos)
+### Módulo: Dashboard
 
-| Método | Endpoint                       | Auth  | Descripción   |
-| ------ | ------------------------------ | ----- | ------------- |
-| POST   | `/api/v1/storage/upload/cover` | ADMIN | Subir portada |
-| POST   | `/api/v1/storage/upload/book`  | ADMIN | Subir PDF     |
+| Método | Endpoint                  | Auth  | Descripción          |
+| ------ | ------------------------- | ----- | -------------------- |
+| GET    | `/api/v1/dashboard/stats` | ADMIN | Obtener estadísticas |
+
+#### Estadísticas del Dashboard
+
+```http
+GET /api/v1/dashboard/stats
+Authorization: Bearer <token_admin>
+```
+
+**Respuesta:**
+
+```json
+{
+  "totalUsers": 150,
+  "totalBooks": 45,
+  "totalPeriods": 3,
+  "totalEnrollments": 120
+}
+```
 
 ---
 
 ## Modelo de Datos
 
+### Usuarios (Admin y Estudiantes)
+
 ```prisma
-// Usuarios (admin y estudiantes)
 model User {
   id          String       @id @default(uuid())
   dni         String       @unique
@@ -367,9 +762,19 @@ model User {
   enrollments Enrollment[]
   reviews     Review[]
   ratings     BookRating[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
-// Períodos académicos
+enum UserRole {
+  ADMIN
+  STUDENT
+}
+```
+
+### Períodos Académicos
+
+```prisma
 model Period {
   id          String       @id @default(uuid())
   name        String       // "2026-I"
@@ -377,33 +782,49 @@ model Period {
   endDate     DateTime
   isCurrent   Boolean      @default(false)
   enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
+```
 
-// Matrículas (User - Period)
+### Matrículas (User - Period)
+
+```prisma
 model Enrollment {
   id        String   @id @default(uuid())
   userId    String
   periodId  String
-  canAccess Boolean  @default(false)
+  canAccess Boolean  @default(false) // false si debe dinero
   user      User     @relation(fields: [userId], references: [id])
   period    Period   @relation(fields: [periodId], references: [id])
-  @@unique([userId, periodId])
-}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-// Categorías
+  @@unique([userId, periodId]) // Un alumno solo una matrícula por período
+}
+```
+
+### Categorías
+
+```prisma
 model Category {
-  id    String @id @default(uuid())
-  name  String
-  slug  String @unique
-  books Book[]
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  books     Book[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+```
 
-// Libros
+### Libros
+
+```prisma
 model Book {
   id             String       @id @default(uuid())
   title          String
   author         String
-  description    String?
+  description    String?      @db.Text
   coverKey       String?      // Clave en MinIO/S3
   fileKey        String       // Clave en MinIO/S3
   isDownloadable Boolean      @default(false)
@@ -411,83 +832,157 @@ model Book {
   category       Category     @relation(fields: [categoryId], references: [id])
   reviews        Review[]
   ratings        BookRating[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
+```
 
-// Comentarios
+### Comentarios (Reviews - Jerárquicos)
+
+```prisma
 model Review {
   id       String  @id @default(uuid())
   content  String
   userId   String
   bookId   String
   parentId String?
-  user     User    @relation(fields: [userId], references: [id])
-  book     Book    @relation(fields: [bookId], references: [id])
-  parent   Review?  @relation("ReviewReplies", fields: [parentId], references: [id])
+
+  user   User    @relation(fields: [userId], references: [id])
+  book   Book    @relation(fields: [bookId], references: [id])
+  parent Review?  @relation("ReviewReplies", fields: [parentId], references: [id])
   children Review[] @relation("ReviewReplies")
+
   createdAt DateTime @default(now())
 }
+```
 
-// Calificaciones
+### Calificaciones
+
+```prisma
 model BookRating {
   id        String   @id @default(uuid())
   userId    String
   bookId    String
   rating    Int      // 1-5
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  @@unique([userId, bookId])
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId]) // Un usuario solo puede calificar una vez por libro
 }
 ```
 
-## Roles de Usuario
+---
 
-| Rol     | Permisos                                                            |
-| ------- | ------------------------------------------------------------------- |
-| STUDENT | Matrícula, comentar libros, calificar libros, leer libros           |
-| ADMIN   | CRUD completo de usuarios, categorías, períodos, matrículas, libros |
+## Roles y Permisos
 
-## Leer Libro (URL Firmada)
+| Rol         | Permisos                                                                                                        |
+| ----------- | --------------------------------------------------------------------------------------------------------------- |
+| **STUDENT** | Ver perfil, matricularse en períodos, comentar libros, calificar libros, leer libros (con matrícula activa)     |
+| **ADMIN**   | CRUD completo de usuarios, categorías, períodos, matrículas, libros, ver estadísticas, ver resúmenes de ratings |
 
-Solo usuarios con matrícula activa pueden leer libros:
+---
 
-```bash
-GET /api/v1/books/:id/read
-Authorization: Bearer <token>
+## Comandos Útiles
 
-# Respuesta
-{
-  "url": "https://...presigned-url...",
-  "expiresAt": "2026-01-31T10:15:00Z"
-}
-```
-
-La URL firmada dura 15 minutos por defecto.
-
-## Depuración
+### Desarrollo
 
 ```bash
-# Ver logs en desarrollo
+# Iniciar con hot-reload
 npm run start:dev
 
-# Logs detallados (en código)
-this.logger.log('Mensaje');
-this.logger.error('Error');
-this.logger.warn('Warning');
+# Iniciar en modo debug
+npm run start:debug
+
+# Ver logs detallados
+npm run start:dev
 ```
 
-## Deployment
+### Producción
 
 ```bash
-# Build
+# Compilar TypeScript
 npm run build
 
-# Production
+# Iniciar producción
 npm run start:prod
 ```
 
+### Base de Datos
+
+```bash
+# Generar cliente Prisma
+npx prisma generate
+
+# Ejecutar migraciones
+npx prisma migrate dev
+
+# Revertir última migración
+npx prisma migrate rollback
+
+# Ver UI de Prisma Studio
+npx prisma studio
+
+# Resetear base de datos (borra todo)
+npx prisma migrate reset
+```
+
+### Testing
+
+```bash
+# Todos los tests
+npm run test
+
+# Tests en modo watch
+npm run test:watch
+
+# Coverage
+npm run test:cov
+
+# Tests e2e
+npm run test:e2e
+
+# Test archivo específico
+npm run test -- src/modules/auth/auth.service.spec.ts
+
+# Test por nombre
+npm run test -t "should be defined"
+```
+
+### Linting y Formato
+
+```bash
+# ESLint con auto-fix
+npm run lint
+
+# Prettier
+npm run format
+```
+
+### Docker
+
+```bash
+# Levantar servicios (PostgreSQL, pgAdmin, MinIO)
+cd biblioteca-db
+docker compose up -d
+
+# Ver logs
+docker compose logs -f
+
+# Detener servicios
+docker compose down
+
+# Detener y borrar volúmenes
+docker compose down -v
+```
+
+---
+
 ## Recursos
 
-- [NestJS Documentation](https://docs.nestjs.com)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs)
+- [Documentación NestJS](https://docs.nestjs.com)
+- [Documentación Prisma](https://www.prisma.io/docs)
+- [Documentación TypeScript](https://www.typescriptlang.org/docs)
+- [Documentación MinIO](https://min.io/docs)
+- [Documentación JWT](https://jwt.io)

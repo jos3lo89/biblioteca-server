@@ -1,0 +1,772 @@
+{
+  "info": {
+    "_postman_id": "cb0a273e-c296-4bfa-b115-66d59c77eff5",
+    "name": "bilbioteca-server",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51717174",
+    "_collection_link": "https://go.postman.co/collection/51717174-cb0a273e-c296-4bfa-b115-66d59c77eff5?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "general",
+      "item": [
+        {
+          "name": "hello",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"dni\": \"11111111\",\r\n    \"password\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ulrBase}}/auth/login",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/auth/logout",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"dni\": \"74843114\",\r\n    \"name\": \"jose luis\",\r\n    \"lastName\": \"galindo cardenas\",\r\n    \"password\": \"123456\",\r\n    \"role\": \"STUDENT\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ulrBase}}/auth/register",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/users/profile",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/users/students?page=1&limit=5&search=",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "users",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create student",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"dni\": \"74843116\",\r\n    \"name\": \"jose luis\",\r\n    \"lastName\": \"galindo cardenas\",\r\n    \"periodId\": \"3d348dbf-5adf-4a73-8f5b-ab8498f84e9a\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ulrBase}}/users/students/register",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "users",
+                "students",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "categories",
+      "item": [
+        {
+          "name": "created",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Drama\",\r\n    \"slug\": \"drama\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ulrBase}}/categories",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/categories?page=1&limit=3&search=",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "3"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/categories/all",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "categories",
+                "all"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "periods",
+      "item": [
+        {
+          "name": "created",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"2026-II\",\r\n  \"startDate\": \"2026-07-01\",\r\n  \"endDate\": \"2026-12-20\",\r\n  \"isCurrent\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ulrBase}}/periods",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "periods"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "set current period",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/periods/3d348dbf-5adf-4a73-8f5b-ab8498f84e9a/current",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "periods",
+                "3d348dbf-5adf-4a73-8f5b-ab8498f84e9a",
+                "current"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all period",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/periods?page=1&limit=5",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "periods"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "enrollments",
+      "item": [
+        {
+          "name": "created",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\": \"2089c119-330b-45f7-8cd0-133fd555ad83\",\r\n    \"periodId\": \"bbc8a14d-1c5a-437c-ab43-675b0c1c3b7d\",\r\n    \"canAccess\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ulrBase}}/enrollments",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "enrollments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all enrollments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/enrollments",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "enrollments"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "books",
+      "item": [
+        {
+          "name": "created book",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "airo man y el lagato wadafaf oamiga",
+                  "type": "text",
+                  "uuid": "31295ce8-bcc8-45a5-9e88-530ea161b1e5"
+                },
+                {
+                  "key": "author",
+                  "value": " wer qwerqw wqw erqwe rqewrewqr werqwer wer",
+                  "type": "text",
+                  "uuid": "f1687009-c7f4-4928-b9f8-171c1267a469"
+                },
+                {
+                  "key": "description",
+                  "value": "qwer qwer weqr qwer qwer qwer wer qwerq wer qwr wqr qwer qwer eqwr qwr qew rqwe rqwe rewq rqew rqwer",
+                  "type": "text",
+                  "uuid": "77480f70-052c-4e33-9f1a-8c1ffc81539f"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "644fc448-fbe1-4e2f-be9a-c353a4077f85",
+                  "type": "text",
+                  "uuid": "237c10d9-a2ec-4d5a-8024-f47fcea5d375"
+                },
+                {
+                  "key": "isDownloadable",
+                  "value": "true",
+                  "type": "text",
+                  "uuid": "0dd8a78c-8183-42f4-94cd-0873c44a8ef4"
+                },
+                {
+                  "key": "cover",
+                  "type": "file",
+                  "uuid": "a24ee3d6-69eb-47d0-b833-24425b832d1e",
+                  "src": "/C:/Users/haru/Desktop/3b33c260e38cd62b2ef6f3d15f8990f3.jpg"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "57a7511b-dd5f-4a4b-bd4b-52907f2c9758",
+                  "src": "/C:/Users/haru/Downloads/pacoyumque.pdf"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{ulrBase}}/books",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "all books",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/books?page=1&limit=5&search=Algebra&category=ficcion",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "books"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "search",
+                  "value": "Algebra"
+                },
+                {
+                  "key": "category",
+                  "value": "ficcion"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "find one book",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/books/25134a20-969c-4351-9dec-9c807fa4fc2d",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "books",
+                "25134a20-969c-4351-9dec-9c807fa4fc2d"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete book",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/books/e22f453b-d560-4500-80be-8baef56d62bc",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "books",
+                "e22f453b-d560-4500-80be-8baef56d62bc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "read book",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/books/25134a20-969c-4351-9dec-9c807fa4fc2d/read",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "books",
+                "25134a20-969c-4351-9dec-9c807fa4fc2d",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "reviews",
+      "item": [
+        {
+          "name": "review -bookid",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/reviews/25134a20-969c-4351-9dec-9c807fa4fc2d/books",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "reviews",
+                "25134a20-969c-4351-9dec-9c807fa4fc2d",
+                "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create review",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n     \"content\":\"wadafa es bueno\",\r\n    \"parentId\": null\r\n }\r\n\r\n//{\r\n  //   \"content\":\"si lo seee\",\r\n    // \"parentId\": \"3eb9bab9-7f80-4bae-8ccd-a0087682e6b7\"\r\n //}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ulrBase}}/reviews/25134a20-969c-4351-9dec-9c807fa4fc2d/books",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "reviews",
+                "25134a20-969c-4351-9dec-9c807fa4fc2d",
+                "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete review",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/reviews/3eb9bab9-7f80-4bae-8ccd-a0087682e6b7",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "reviews",
+                "3eb9bab9-7f80-4bae-8ccd-a0087682e6b7"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ratings",
+      "item": [
+        {
+          "name": "add rating",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"rating\": 3\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ulrBase}}/ratings/25134a20-969c-4351-9dec-9c807fa4fc2d/books",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "ratings",
+                "25134a20-969c-4351-9dec-9c807fa4fc2d",
+                "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get rating book",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/ratings/25134a20-969c-4351-9dec-9c807fa4fc2d/my-rating",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "ratings",
+                "25134a20-969c-4351-9dec-9c807fa4fc2d",
+                "my-rating"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "rating book summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/ratings/25134a20-969c-4351-9dec-9c807fa4fc2d/summary",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "ratings",
+                "25134a20-969c-4351-9dec-9c807fa4fc2d",
+                "summary"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "dashboard",
+      "item": [
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ulrBase}}/dashboard/stats",
+              "host": [
+                "{{ulrBase}}"
+              ],
+              "path": [
+                "dashboard",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "ulrBase",
+      "value": "http://localhost:5000/api/v1"
+    }
+  ]
+}
