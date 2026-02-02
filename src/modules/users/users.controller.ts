@@ -5,6 +5,7 @@ import {
   DefaultValuePipe,
   Get,
   HttpStatus,
+  Param,
   ParseIntPipe,
   Post,
   Query,
@@ -27,10 +28,13 @@ export class UsersController {
     return this.userService.myProfile(user.id);
   }
 
-  @Get('students')
+  @Get(':role/with-role')
   @Auth(UserRole.ADMIN)
-  getAllStudents(@Query() query: FindUsersQueryDto) {
-    return this.userService.getAllStudents(query);
+  getUsersWithRole(
+    @Param('role') role: UserRole,
+    @Query() query: FindUsersQueryDto,
+  ) {
+    return this.userService.getUsersWithRole(role, query);
   }
 
   @Post('students/register')
